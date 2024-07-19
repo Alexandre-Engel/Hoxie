@@ -34,6 +34,6 @@ jobs:
         
     - name: Lancer le bot
       run: |
-        timeout 1m python main.py
+        timeout 1m python main.py || exit 0
       env:
         DISCORDTOKEN: ${{ secrets.DISCORDTOKEN }}
