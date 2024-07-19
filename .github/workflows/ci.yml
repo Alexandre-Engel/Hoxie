@@ -34,6 +34,6 @@ jobs:
         
     - name: Lancer le bot
       run: |
-        python main.py
+        tiemout 1m python main.py
       env:
         DISCORDTOKEN: ${{ secrets.DISCORDTOKEN }}
