@@ -37,3 +37,4 @@ jobs:
         timeout 1m python main.py || exit 0
       env:
         DISCORDTOKEN: ${{ secrets.DISCORDTOKEN }}
+        CONNECTIONSTRING: ${{ secrets.CONNECTIONSTRING }}
