@@ -88,8 +88,7 @@ class Moderation(commands.Cog):
             )
 
             await ctx.send(embed=embed)
-            await member.send(f"Tu as été banni pour la raison : {reason}")
-            await member.ban(reason=reason)
+            await ctx.guild.ban(member, reason=reason, delete_message_days=0)
 
 
     @ban.error
@@ -119,26 +118,25 @@ class Moderation(commands.Cog):
             colour=discord.Colour.red()
         )
         await ctx.send(embed=embed)
-        await member.send(f"Tu as été expulsé pour la raison : {reason}")
-        await member.kick(reason=reason)
+        await ctx.guild.kick(member, reason=reason)
 
 
     @kick.error
-    async def kick_error(error, ctx):
+    async def kick_error(self, ctx, error):
         if isinstance(error, MissingPermissions):
             embed = Embed(
                 title='Ahah bien tenté ! ',
-                description=f"Mais tu n'as pas les permissions de kick",
+                description="Mais tu n'as pas les permissions de kick",
                 colour=discord.Colour.red()
             )
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed)  
         else:
             embed = Embed(
                 title='Erreur',
-                description=f"L'expulsion n'a pas pu avoir lieu, surement un coup de Fulcrum ! ",
+                description="L'expulsion n'a pas pu avoir lieu, surement un coup de Fulcrum !",
                 colour=discord.Colour.red()
             )
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed) 
 
 
     @commands.hybrid_command(name='mute')
@@ -149,14 +147,15 @@ class Moderation(commands.Cog):
             description=f"{member} a été rendu muet pour la raison : {reason}",
             colour=discord.Colour.red()
         )
+        clown_de_rue = ctx.guild.get_role(512003660058722324)
+        await member.add_roles(clown_de_rue)
         await ctx.send(embed=embed)
         await member.send(f"Tu as été rendu muet pour la raison : {reason}")
         
-        print("Clown de rue")
 
 
     @mute.error
-    async def mute_error(error, ctx):
+    async def mute_error(self, error, ctx):
         if isinstance(error, MissingPermissions):
             embed = Embed(
                 title='Ahah bien tenté ! ',
