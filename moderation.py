@@ -5,6 +5,31 @@ from discord.ext.commands import MissingPermissions, has_permissions
 from discord import Embed
 import connectDB
 
+class ConfirmView(View):
+    def __init__(self, ctx, message):
+        super().__init__()
+        self.ctx = ctx
+        self.message = message
+        self.value = None
+
+    @discord.ui.button(label="Oui", style=discord.ButtonStyle.green, emoji="✔")
+    async def confirm(self, interaction: discord.Interaction, button: Button):
+        if interaction.user != self.ctx.author:
+            return  # Check if the person interacting is the one who invoked the command
+        self.value = True
+        await self.message.delete() # Supprimer le message d'origine
+        await interaction.response.send_message("Suppression effectuée.", ephemeral=True)
+        self.stop()
+
+    @discord.ui.button(label="Non", style=discord.ButtonStyle.red, emoji="❌")
+    async def cancel(self, interaction: discord.Interaction, button: Button):
+        if interaction.user != self.ctx.author:
+            return  # Vérifier si la personne interagissant est celle qui a invoqué la commande
+        self.value = False
+        await self.message.delete() # Supprimer le message d'origine
+        await interaction.response.send_message("Suppression annulée.", ephemeral=True)
+        self.stop()
+
 class Moderation(commands.Cog):
 
     def __init__(self, bot):
@@ -226,6 +251,26 @@ class Moderation(commands.Cog):
             colour=discord.Colour.red()
         )
         await ctx.send(embed=embed)
+        
+        
+    @commands.hybrid_command()
+    @commands.has_role("Cénariste (MJ)")
+    async def removehrp(self, ctx):
+        embed = discord.Embed(title="Suppression du message",
+                            description="Voulez-vous vraiment supprimer tous les "
+                                        "commentaires de ce salon RP ?")
+        message = await ctx.send(embed=embed)
+        view = ConfirmView(ctx, message)
+        await message.edit(view=view)
+        await view.wait()
+
+        if view.value is None:
+            return  
+        elif view.value:
+            message = [message async for message in ctx.channel.history(limit=50)]
+            for each_message in message:
+                if each_message.content.startswith('(') and each_message.content.endswith(')'):
+                    await each_message.delete()
             
 # appelé au chargement de l'extension par le bot
 async def setup(bot):
