@@ -1,8 +1,9 @@
 import discord
 from discord.ext import commands
 from discord.ui import Button, View
-from discord.ext.commands import MissingPermissions
+from discord.ext.commands import MissingPermissions, has_permissions
 from discord import Embed
+import connectDB
 
 class Moderation(commands.Cog):
 
@@ -53,19 +54,179 @@ class Moderation(commands.Cog):
     @delete.error
     async def delete_error(self, ctx, error):
         if isinstance(error, MissingPermissions):
-            embed = discord.Embed(
+            embed = Embed(
                 title='Permissions',
                 description=f"Tu n'as pas la permission d'effectuer cette commande",
                 colour=discord.Colour.red()
             )
             await ctx.send(embed=embed)
         else:
-            embed = discord.Embed(
+            embed = Embed(
                 title='Erreur',
                 description=f"Une erreur s'est produite {error}",
                 colour=discord.Colour.red()
             )
             await ctx.send(embed=embed)
+            
+            
+        
+    @commands.hybrid_command(name='ban')
+    @has_permissions(ban_members=True)
+    async def ban(self, ctx, member: discord.Member, *, reason=None):
+        if member.id == 463463057268539402:
+            embed = Embed(
+                title='Bannissement',
+                description=f"{member} a été banni pour la raison : {reason}",
+                colour=discord.Colour.red()
+            )
+            await ctx.send(embed=embed)
+        else:
+            embed = Embed(
+                title='Bannissement',
+                description=f"{member} a été banni pour la raison : {reason}",
+                colour=discord.Colour.red()
+            )
+
+            await ctx.send(embed=embed)
+            await member.send(f"Tu as été banni pour la raison : {reason}")
+            await member.ban(reason=reason)
+
+
+    @ban.error
+    async def ban_error(self, ctx, error):
+        if isinstance(error, MissingPermissions):
+            embed = Embed(
+                title='Ahah bien tenté !',
+                description=f"Mais tu n'as pas les permissions de ban",
+                colour=discord.Colour.red()
+            )
+            await ctx.send(embed=embed)
+        else:
+            embed = Embed(
+                title='Erreur',
+                description=f"Le bannissement n'a pas pu avoir lieu, surement un coup de Fulcrum ! ",
+                colour=discord.Colour.red()
+            )
+            await ctx.send(embed=embed)
+
+
+    @commands.hybrid_command(name='kick')
+    @has_permissions(kick_members=True)
+    async def kick(self, ctx, member: discord.Member, *, reason=None):
+        embed = Embed(
+            title='Explusion',
+            description=f"{member} a été expulsé pour la raison : {reason}",
+            colour=discord.Colour.red()
+        )
+        await ctx.send(embed=embed)
+        await member.send(f"Tu as été expulsé pour la raison : {reason}")
+        await member.kick(reason=reason)
+
+
+    @kick.error
+    async def kick_error(error, ctx):
+        if isinstance(error, MissingPermissions):
+            embed = Embed(
+                title='Ahah bien tenté ! ',
+                description=f"Mais tu n'as pas les permissions de kick",
+                colour=discord.Colour.red()
+            )
+            await ctx.send(embed=embed)
+        else:
+            embed = Embed(
+                title='Erreur',
+                description=f"L'expulsion n'a pas pu avoir lieu, surement un coup de Fulcrum ! ",
+                colour=discord.Colour.red()
+            )
+            await ctx.send(embed=embed)
+
+
+    @commands.hybrid_command(name='mute')
+    @has_permissions(manage_roles=True)
+    async def mute(self, ctx, member: discord.Member, *, reason=None):
+        embed = Embed(
+            title='Muet',
+            description=f"{member} a été rendu muet pour la raison : {reason}",
+            colour=discord.Colour.red()
+        )
+        await ctx.send(embed=embed)
+        await member.send(f"Tu as été rendu muet pour la raison : {reason}")
+        
+        print("Clown de rue")
+
+
+    @mute.error
+    async def mute_error(error, ctx):
+        if isinstance(error, MissingPermissions):
+            embed = Embed(
+                title='Ahah bien tenté ! ',
+                description=f"Mais tu n'as pas les permissions de kick",
+                colour=discord.Colour.red()
+            )
+            await ctx.send(embed=embed)
+        else:
+            embed = Embed(
+                title='Erreur',
+                description=f"L'expulsion n'a pas pu avoir lieu, surement un coup de Fulcrum ! ",
+                colour=discord.Colour.red()
+            )
+            await ctx.send(embed=embed)
+
+
+    @commands.hybrid_command(name='userinfo')
+    async def userinfo(self, ctx,  member: discord.Member = None):
+        if member is None:
+            member = ctx.author
+        dbname = connectDB.get_database()
+        member_db = dbname["members"]
+        member_details = member_db.find_one({"member_id": member.id})
+        embed = Embed(
+            title=f"{member.name}",
+            colour=discord.Colour.purple()
+        )
+        embed.set_footer(text=f"Information sur {member.name}")
+        embed.set_thumbnail(url=member.avatar.url)
+        embed.add_field(name="Identifiant", value=member.id, inline=False)
+        embed.add_field(name="A rejoint discord", value=member.created_at.strftime("%d %B %Y"), inline=True)
+        embed.add_field(name="A rejoint le serveur", value=member.joined_at.strftime("%d %B %Y"), inline=True)
+        embed.add_field(name="Meilleure distinction", value=member.top_role.mention, inline=False)
+        embed.set_author(name=member,
+                        icon_url=member.avatar.url)
+
+        embed.add_field(name="Crédits", value=member_details["credits"], inline=True)
+        embed.add_field(name="Richesse", value=member_details["richesse"], inline=True)
+        perso_count = dbname["character"].count_documents({"owner": member_details["_id"]})
+        if perso_count == 1:
+            embed.add_field(name="Personnage(s) dans le rp",
+                            value=f"{perso[0]['character_surname']} {perso[0]['character_name']}", inline=False)
+        elif perso_count == 2:
+            embed.add_field(name="Personnage(s) dans le rp",
+                            value=f"{perso[0]['character_surname']} {perso[0]['character_name']}\n"
+                                f"{perso[1]['character_surname']} {perso[1]['character_name']}", inline=False)
+        elif perso_count == 3:
+            embed.add_field(name="Personnage(s) dans le rp",
+                            value=f"{perso[0]['character_surname']} {perso[0]['character_name']}\n"
+                                f"{perso[1]['character_surname']} {perso[1]['character_name']}\n"
+                                f"{perso[2]['character_surname']} {perso[2]['character_name']}", inline=False)
+        else:
+            embed.add_field(name="Personnage(s) dans le rp", value="Pas de personnage rp", inline=False)
+        try:
+            embed.add_field(name="Anniversaire", value=member_details["birthday"], inline=False)
+        except:
+            embed.add_field(name="Anniversaire", value="non renseigné", inline=False)
+        await ctx.send(embed=embed)
+
+
+    @userinfo.error
+    async def userinfo_error(self, ctx, error):
+        general_channel = self.bot.get_channel(550597813809971220)
+        await general_channel.send(error)
+        embed = Embed(
+            title='Erreur',
+            description=f"Je crains ne pas pouvoir accéder à votre requête {error}",
+            colour=discord.Colour.red()
+        )
+        await ctx.send(embed=embed)
             
 # appelé au chargement de l'extension par le bot
 async def setup(bot):
