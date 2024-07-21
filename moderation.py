@@ -4,6 +4,8 @@ from discord.ui import Button, View
 from discord.ext.commands import MissingPermissions, has_permissions
 from discord import Embed
 import connectDB
+from bson.objectid import ObjectId
+
 
 class ConfirmView(View):
     def __init__(self, ctx, message):
@@ -219,19 +221,21 @@ class Moderation(commands.Cog):
 
         embed.add_field(name="Crédits", value=member_details["credits"], inline=True)
         embed.add_field(name="Richesse", value=member_details["richesse"], inline=True)
-        perso_count = dbname["character"].count_documents({"owner": member_details["_id"]})
-        if perso_count == 1:
-            embed.add_field(name="Personnage(s) dans le rp",
-                            value=f"{perso[0]['character_surname']} {perso[0]['character_name']}", inline=False)
-        elif perso_count == 2:
-            embed.add_field(name="Personnage(s) dans le rp",
-                            value=f"{perso[0]['character_surname']} {perso[0]['character_name']}\n"
-                                f"{perso[1]['character_surname']} {perso[1]['character_name']}", inline=False)
-        elif perso_count == 3:
-            embed.add_field(name="Personnage(s) dans le rp",
-                            value=f"{perso[0]['character_surname']} {perso[0]['character_name']}\n"
-                                f"{perso[1]['character_surname']} {perso[1]['character_name']}\n"
-                                f"{perso[2]['character_surname']} {perso[2]['character_name']}", inline=False)
+        perso = dbname["characters"].find({"owner": ObjectId(member_details["_id"])})
+
+        # Initialisation d'une liste pour stocker les noms des personnages
+        personnages = []
+
+        # Itération sur le curseur pour accéder à chaque document
+        for document in perso:
+            # Construction du nom complet du personnage
+            nom_complet = f"{document['character_surname']} {document['character_name']}"
+            # Ajout du nom complet à la liste des personnages
+            personnages.append(nom_complet)
+
+        print(personnages)
+        if personnages:
+            embed.add_field(name="Personnage(s) dans le rp", value="\n".join(personnages), inline=False)
         else:
             embed.add_field(name="Personnage(s) dans le rp", value="Pas de personnage rp", inline=False)
         try:
