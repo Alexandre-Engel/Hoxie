@@ -11,6 +11,7 @@ class Hoxie(commands.Bot):
     async def setup_hook(self) -> None:
         await bot.load_extension("ficheRP")
         await bot.load_extension("log")
+        await bot.load_extension("accueil")
         await bot.load_extension("moderation")
         await bot.load_extension("information")
         await self.tree.sync() # Pour gérer les commandes slash
