@@ -45,7 +45,8 @@ class Anniversaire(commands.Cog):
     @tasks.loop(minutes=4)
     async def anniv(self):
         date = datetime.datetime.now()
-        if date.hour == 9 and date.minute in range(0, 5):
+        print(date)
+        if date.hour == 9 and date.minute in range(0, 4):
             today = str(date.day) + '/' + str(date.month)
             dbname = connectDB.get_database()
             member_db = dbname["members"]
@@ -61,7 +62,7 @@ class Anniversaire(commands.Cog):
                     url="https://media.discordapp.net/attachments/573260699170766849/860538087704363059/unknown.png?width=1205&height=676")
                 embed.set_author(name="Bot de la RDG",
                                 icon_url="https://cdn.discordapp.com/avatars/854720528425156639/b5e1663f0d67c8853714c41a9734f6e5.webp?size=256")
-                general_channel = self.bot.get_channel(502202133228158989) # 503148462565490718
+                general_channel = self.bot.get_channel(503148462565490718) # 503148462565490718
                 await general_channel.send(embed=embed)
                 
     @anniv.before_loop
