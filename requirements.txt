@@ -1,2 +1,7 @@
 discord.py
 flake8
+pytest
+pymongo
+discord_components
+logger
+python-dotenv
