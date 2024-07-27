@@ -10,7 +10,7 @@ class Annonce(commands.Cog):
     @commands.hybrid_command(name='annonce')
     @commands.has_any_role("Leader Gungan (Admin)", "Grand Cénariste (Chef-MJ)")
     async def announcement(self, ctx, titre , message):
-        general_channel = self.bot.get_channel(502202133228158989) #config 503648197210537988
+        general_channel = self.bot.get_channel(503648197210537988) #config 503648197210537988
         embed = discord.Embed(
             title=titre,
             description=message,
@@ -23,7 +23,7 @@ class Annonce(commands.Cog):
         embed.set_author(name="Hoxie",
                         icon_url="https://cdn.discordapp.com/avatars/854720528425156639/b5e1663f0d67c8853714c41a9734f6e5.webp?size=256")
 
-        await general_channel.send("|| @everyone ||", embed=embed)
+        await general_channel.send("|| everyone ||", embed=embed)
         
         
     @announcement.error
@@ -42,6 +42,25 @@ class Annonce(commands.Cog):
                 colour=discord.Colour.red()
             )
             await ctx.send(embed=embed)
+            
+            
+    @commands.hybrid_command(name='testannonce')
+    @commands.has_any_role("Leader Gungan (Admin)", "Grand Cénariste (Chef-MJ)")
+    async def test_announcement(self, ctx, titre , message):
+        general_channel = self.bot.get_channel(573260699170766849) #config 503648197210537988
+        embed = discord.Embed(
+            title=titre,
+            description=message,
+            colour=discord.Colour.gold()
+        )
+        embed.set_footer(text="Vos Leaders Gungans")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/716757114147700747/859383798369091604/rdg.png")
+        embed.set_thumbnail(
+            url="https://cdn.discordapp.com/avatars/854720528425156639/b5e1663f0d67c8853714c41a9734f6e5.webp?size=256")
+        embed.set_author(name="Hoxie",
+                        icon_url="https://cdn.discordapp.com/avatars/854720528425156639/b5e1663f0d67c8853714c41a9734f6e5.webp?size=256")
+
+        await general_channel.send("|| everyone ||", embed=embed)
 
 
     
