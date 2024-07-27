@@ -4,3 +4,4 @@ pytest
 pymongo
 discord_components
 logger
+python-dotenv

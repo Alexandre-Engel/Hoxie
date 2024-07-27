@@ -1,6 +1,8 @@
 import os
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
+load_dotenv(dotenv_path='.env')
 
 bot_version = "2.0"
 
